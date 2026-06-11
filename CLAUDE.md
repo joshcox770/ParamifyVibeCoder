@@ -57,6 +57,65 @@ checking on the client. The server is the trust boundary.
 - Trust `X-Forwarded-User` only because Traefik sets it. Don't expose a route
   path that bypasses the proxy.
 
+## ⭐ Database — this is built in, always use it
+
+**There is already a database wired up (Prisma + SQLite). Never add a different
+ORM, a second database, or raw connection code.** One env var, `DATABASE_URL`,
+controls where data lives — a local file in dev, a file on a persistent volume
+in production. The same SQLite engine runs in both places, so there's no
+dialect drift.
+
+### How it's wired
+
+- `prisma/schema.prisma` — the data model. **This is the file you edit to change
+  what's stored.**
+- `app/db.server.ts` → exports `db`, the shared Prisma client (server-only).
+- `DATABASE_URL` — `file:./dev.db` locally; set in Coolify for production.
+
+### How to use it (copy these patterns)
+
+```ts
+import { getUser } from "~/auth.server";
+import { db } from "~/db.server";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = getUser(request);
+  // Always scope queries to the user so people only see their own data.
+  return { notes: await db.note.findMany({ where: { userEmail: user.email } }) };
+}
+
+export async function action({ request }: Route.ActionArgs) {
+  const user = getUser(request);
+  const form = await request.formData();
+  await db.note.create({ data: { body: String(form.get("body")), userEmail: user.email } });
+  return { ok: true };
+}
+```
+
+The `Note` model in `prisma/schema.prisma` (tied to `userEmail`) is the starter
+pattern — copy it to add new models. See `app/routes/home.tsx` for full
+list/create/delete CRUD.
+
+### Changing the schema (the workflow)
+
+1. Edit `prisma/schema.prisma`.
+2. Run `npm run db:migrate` (prompts for a migration name). This updates the DB
+   and regenerates the typed client.
+3. Use the new fields/models via `db`.
+
+`npm run db:studio` opens a visual table editor in the browser.
+
+### Rules
+
+- **SQLite has no `enum` or array/list column types.** For a fixed set of
+  values (status, role, etc.) use a plain `String`. For a list, use a related
+  model. Don't add `enum` or `String[]` fields to the schema.
+- Production data lives on the Coolify volume; migrations run automatically on
+  deploy (`prisma migrate deploy` in the `start` script). Don't run destructive
+  migrations without care.
+- To scale beyond SQLite later, the path is Coolify's managed Postgres: change
+  the `provider` to `postgresql`, point `DATABASE_URL` at it, re-migrate.
+
 ## Project conventions
 
 - **Routes** are configured in `app/routes.ts`; route modules export
