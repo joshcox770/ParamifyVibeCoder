@@ -1,22 +1,31 @@
-FROM node:20-alpine AS development-dependencies-env
-COPY . /app
+# --- Build Stage ---
+FROM node:22.14-slim AS builder
 WORKDIR /app
+
+# Enable corepack for modern package management
+RUN corepack enable
+
+# Install dependencies
+COPY package*.json ./
 RUN npm ci
 
-FROM node:20-alpine AS production-dependencies-env
-COPY ./package.json package-lock.json /app/
-WORKDIR /app
-RUN npm ci --omit=dev
-
-FROM node:20-alpine AS build-env
-COPY . /app/
-COPY --from=development-dependencies-env /app/node_modules /app/node_modules
-WORKDIR /app
+# Copy source and build the React Router app
+COPY . .
 RUN npm run build
 
-FROM node:20-alpine
-COPY ./package.json package-lock.json /app/
-COPY --from=production-dependencies-env /app/node_modules /app/node_modules
-COPY --from=build-env /app/build /app/build
-WORKDIR /app
-CMD ["npm", "run", "start"]
+# --- Production Stage ---
+FROM nginx:alpine AS runner
+# React Router v7 outputs static client builds to build/client
+COPY --from=builder /app/build/client /usr/share/nginx/html
+
+# Adjust Nginx to handle React Router single-page application routing
+RUN echo 'server { \
+    listen 80; \
+    location / { \
+        root /usr/share/nginx/html; \
+        try_files $uri $uri/ /index.html; \
+    } \
+}' > /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
