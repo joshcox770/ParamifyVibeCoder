@@ -1,31 +1,37 @@
 # --- Build Stage ---
-FROM node:22.14-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
-# Enable corepack for modern package management
+# Enable corepack for modern package manager pinning
 RUN corepack enable
 
-# Install dependencies
+# Install ALL dependencies (including devDependencies for compiling)
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and build the React Router app
+# Copy source and run compilation (generates ./build/server and ./build/client)
 COPY . .
 RUN npm run build
 
 # --- Production Stage ---
-FROM nginx:alpine AS runner
-# React Router v7 outputs static client builds to build/client
-COPY --from=builder /app/build/client /usr/share/nginx/html
+FROM node:22-slim AS runner
+WORKDIR /app
 
-# Adjust Nginx to handle React Router single-page application routing
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
+# Set production environment flags
+ENV NODE_ENV=production
+ENV PORT=3000
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+RUN corepack enable
+
+# Copy built bundles from the builder stage
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/package*.json ./
+
+# Install ONLY production dependencies to keep the image lightweight
+RUN npm ci --omit=dev
+
+# Expose the default port react-router-serve listens on
+EXPOSE 3000
+
+# Fire up the React Router Node server
+CMD ["npm", "run", "start"]
