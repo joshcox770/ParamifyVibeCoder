@@ -8,7 +8,21 @@ import {
 } from "react-router";
 
 import type { Route } from "./+types/root";
+import { getUser } from "./auth.server";
 import "./app.css";
+
+/**
+ * Global root loader — runs on the server for every request.
+ *
+ * Resolves the authenticated user once at the top of the tree. The returned
+ * data is available to every route via `useRouteLoaderData("root")`, which the
+ * `useUser()` hook wraps. `getUser` throws a 401 in production if the trusted
+ * identity header is missing, which the `ErrorBoundary` below renders cleanly.
+ */
+export async function loader({ request }: Route.LoaderArgs) {
+  const user = getUser(request);
+  return { user };
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -51,11 +65,19 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let stack: string | undefined;
 
   if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
+    // Identity guard tripped: the root loader couldn't resolve a user.
+    if (error.status === 401) {
+      message = "Not signed in";
+      details =
+        "We couldn't verify your identity. Please access this app through " +
+        "the authenticated gateway.";
+    } else {
+      message = error.status === 404 ? "404" : "Error";
+      details =
+        error.status === 404
+          ? "The requested page could not be found."
+          : error.statusText || details;
+    }
   } else if (import.meta.env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
