@@ -110,6 +110,14 @@ list/create/delete CRUD.
 - **SQLite has no `enum` or array/list column types.** For a fixed set of
   values (status, role, etc.) use a plain `String`. For a list, use a related
   model. Don't add `enum` or `String[]` fields to the schema.
+- **Prefer the typed `db` API** (`db.note.findMany(...)`) over raw SQL — it's
+  safer and you rarely need raw queries. If you *do* drop to raw SQL: use
+  `db.$queryRaw`/`$queryRawUnsafe` for anything that returns rows (SELECT, and
+  SQLite `PRAGMA`s like `journal_mode`), and `db.$executeRaw`/`$executeRawUnsafe`
+  only for statements that return a row count (INSERT/UPDATE/DELETE/DDL). Using
+  `$executeRaw*` on a query that returns rows throws *"Execute returned results,
+  which is not allowed in SQLite"* (this is why the WAL pragma in
+  `app/db.server.ts` uses `$queryRawUnsafe`).
 - Production data lives on the Coolify volume; migrations run automatically on
   deploy (`prisma migrate deploy` in the `start` script). Don't run destructive
   migrations without care.

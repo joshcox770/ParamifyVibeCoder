@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "predev": "node ./scripts/ensure-env.mjs",
+    "predev": "node ./scripts/ensure-env.mjs && prisma migrate deploy",
     "dev": "react-router dev",
     "start": "prisma migrate deploy && react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",

@@ -23,8 +23,10 @@ function createPrismaClient() {
 
   // Enable WAL mode: lets reads and writes happen concurrently, which keeps a
   // single-container SQLite deployment responsive under modest load.
+  // Note: `PRAGMA journal_mode` *returns a row* (the new mode), so this must use
+  // $queryRawUnsafe — $executeRawUnsafe rejects statements that return results.
   client
-    .$executeRawUnsafe("PRAGMA journal_mode=WAL;")
+    .$queryRawUnsafe("PRAGMA journal_mode=WAL;")
     .catch((error) => console.warn("Could not enable SQLite WAL mode:", error));
 
   return client;

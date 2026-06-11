@@ -7,8 +7,8 @@ Traefik reverse proxy with Google OAuth.
 ## Using this template with Claude
 
 This repo ships a `CLAUDE.md` at the root describing the project's conventions
-and its built-in tools (like the authenticated user), so Claude builds on
-what's here instead of reinventing it.
+and its built-in tools (the authenticated user and the database), so Claude
+builds on what's here instead of reinventing it.
 
 - **Claude Code:** nothing to do — `CLAUDE.md` is loaded automatically every
   session. If you open Claude Code at a directory *above* this repo, point it
