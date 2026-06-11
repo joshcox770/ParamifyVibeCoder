@@ -1,87 +1,67 @@
-# Welcome to React Router!
+# Paramify Vibe Coder Template
 
-A modern, production-ready template for building full-stack React applications using React Router.
+A production-ready template for vibe-coding full-stack apps: React Router v7
+(SSR) + TypeScript + TailwindCSS, deployed as a Docker container behind a
+Traefik reverse proxy with Google OAuth.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/remix-run/react-router-templates/tree/main/default)
+## Using this template with Claude
 
-## Features
+This repo ships a `CLAUDE.md` at the root describing the project's conventions
+and its built-in tools (like the authenticated user), so Claude builds on
+what's here instead of reinventing it.
 
-- 🚀 Server-side rendering
-- ⚡️ Hot Module Replacement (HMR)
-- 📦 Asset bundling and optimization
-- 🔄 Data loading and mutations
-- 🔒 TypeScript by default
-- 🎉 TailwindCSS for styling
-- 📖 [React Router docs](https://reactrouter.com/)
+- **Claude Code:** nothing to do — `CLAUDE.md` is loaded automatically every
+  session. If you open Claude Code at a directory *above* this repo, point it
+  here (`cd` into the project, or add the path) so it picks up the file.
+- **Claude Desktop:** Desktop doesn't read `CLAUDE.md` automatically. For the
+  best results, open the contents of `CLAUDE.md` and paste it into your Claude
+  **Project → custom instructions**. (Or connect the Filesystem MCP server to
+  this folder so Claude can read the file directly.)
 
-## Getting Started
+## Getting started
 
-### Installation
-
-Install the dependencies:
+Install dependencies and start the dev server with HMR:
 
 ```bash
 npm install
-```
-
-### Development
-
-Start the development server with HMR:
-
-```bash
 npm run dev
 ```
 
-Your application will be available at `http://localhost:5173`.
+Your app will be available at `http://localhost:5173`.
 
-## Building for Production
+Type-check before shipping a change:
 
-Create a production build:
+```bash
+npm run typecheck
+```
+
+## Building for production
 
 ```bash
 npm run build
 ```
 
+Build output:
+
+```
+build/
+├── client/    # Static assets
+└── server/    # Server-side code
+```
+
 ## Deployment
 
-### Docker Deployment
-
-To build and run using Docker:
+### Docker
 
 ```bash
 docker build -t my-app .
-
-# Run the container
 docker run -p 3000:3000 my-app
 ```
 
-The containerized application can be deployed to any platform that supports Docker, including:
+The container can be deployed to any platform that runs Docker (Cloud Run, ECS,
+Fly.io, Railway, etc.).
 
-- AWS ECS
-- Google Cloud Run
-- Azure Container Apps
-- Digital Ocean App Platform
-- Fly.io
-- Railway
+### DIY
 
-### DIY Deployment
-
-If you're familiar with deploying Node applications, the built-in app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-```
-├── package.json
-├── package-lock.json (or pnpm-lock.yaml, or bun.lockb)
-├── build/
-│   ├── client/    # Static assets
-│   └── server/    # Server-side code
-```
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever CSS framework you prefer.
-
----
-
-Built with ❤️ using React Router.
+The built-in `react-router-serve` server is production-ready. Deploy the output
+of `npm run build` along with your `package.json` and lockfile.
