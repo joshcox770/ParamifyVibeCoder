@@ -93,8 +93,9 @@ export async function action({ request }: Route.ActionArgs) {
 ```
 
 The `Note` model in `prisma/schema.prisma` (tied to `userEmail`) is the starter
-pattern — copy it to add new models. See `app/routes/home.tsx` for full
-list/create/delete CRUD.
+pattern — copy it to add new models, and use the loader/action snippets above
+as the read/write pattern. (The home page is a generic landing page and doesn't
+use the database yet — wire it in when you build your first feature.)
 
 ### Changing the schema (the workflow)
 
