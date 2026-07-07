@@ -4,7 +4,7 @@ This is a **template repo** for vibe-coded full-stack apps: React Router v7
 (Remix-style, SSR) + TypeScript + TailwindCSS, deployed as a Docker container
 behind a Traefik reverse proxy.
 
-## ⭐ Authenticated user — this is built in, always use it
+## Authenticated user — this is built in, always use it
 
 **There is already a first-class way to get the current signed-in user. Never
 build your own auth, login page, session store, or user-fetching code.** In
@@ -57,7 +57,7 @@ checking on the client. The server is the trust boundary.
 - Trust `X-Forwarded-User` only because Traefik sets it. Don't expose a route
   path that bypasses the proxy.
 
-## ⭐ Database — this is built in, always use it
+## Database — this is built in, always use it
 
 **There is already a database wired up (Prisma + SQLite). Never add a different
 ORM, a second database, or raw connection code.** One env var, `DATABASE_URL`,
