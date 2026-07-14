@@ -2,7 +2,7 @@
 
 This is a **template repo** for vibe-coded full-stack apps: React Router v7
 (Remix-style, SSR) + TypeScript + TailwindCSS, deployed as a Docker container
-behind a Traefik reverse proxy.
+behind a Traefik reverse proxy all managed by Coolify.
 
 ## Authenticated user — this is built in, always use it
 
